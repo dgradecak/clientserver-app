@@ -10,15 +10,20 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact-name: app-linux-x64
-            binary-path: target/app # Update 'app' to match your actual compiled binary name
+            artifact-name: backend-linux-x64
+            binary-path: |
+              target/clientserver
+              target/*.so
           - os: windows-latest
-            artifact-name: app-windows-x64.exe
-            binary-path: target/app.exe
-          - os: macos-latest # This is the free Apple Silicon Mac (M1/M2/M3)
-            artifact-name: app-macos-arm64
-            binary-path: target/app
-
+            artifact-name: backend-windows-x64
+            binary-path: |
+              target/clientserver.exe
+              target/*.dll
+          - os: macos-latest
+            artifact-name: backend-macos-arm64
+            binary-path: |
+              target/clientserver
+              target/*.dylib
     steps:
       # 1. Automatically check out the source code from THIS repository
       - name: Checkout Source Code
