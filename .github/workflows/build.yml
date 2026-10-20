@@ -1,0 +1,50 @@
+name: Spring Boot Native Build
+on:
+  workflow_dispatch: # Allows you to manually trigger this build via a button click on GitHub
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact-name: app-linux-x64
+            binary-path: target/app # Update 'app' to match your actual compiled binary name
+          - os: windows-latest
+            artifact-name: app-windows-x64.exe
+            binary-path: target/app.exe
+          - os: macos-latest # This is the free Apple Silicon Mac (M1/M2/M3)
+            artifact-name: app-macos-arm64
+            binary-path: target/app
+
+    steps:
+      # 1. Automatically check out the source code from THIS repository
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 2. Set up GraalVM and caching
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21' # Make sure this matches your project's Java version
+          distribution: 'graalvm'
+          components: 'native-image'
+          cache: 'maven' # Caches your pom.xml dependencies to make subsequent builds blazing fast
+
+      # 3. Build Spring Boot Native with memory caps to prevent runner crashes
+      - name: Build Spring Boot Native Image
+        run: |
+          export MAVEN_OPTS="-Xmx6g"
+          mvn -Pnative native:compile -Dnative-image.args="-J-Xmx8g --no-fallback"
+        # Windows requires shell configuration to run multi-line commands natively
+        shell: bash 
+
+      # 4. Upload the reverse-engineer-proof binary so you can download it
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.binary-path }}
+          if-no-files-found: error
