@@ -28,7 +28,7 @@ jobs:
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21' # Make sure this matches your project's Java version
+          java-version: '25' # Make sure this matches your project's Java version
           distribution: 'graalvm'
           components: 'native-image'
           cache: 'maven' # Caches your pom.xml dependencies to make subsequent builds blazing fast
